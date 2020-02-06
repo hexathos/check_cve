@@ -23,3 +23,6 @@ Example call:
 # Requirements
 hx_check_cve requires lsb-release and debsecan. You can install those by running
 `apt install lsb-release debsecan`
+
+# Debian Package
+A package for Debian ist available at https://files.hexathos.de/projects/hx-monitoring-plugin-checkcve/ , it should work on ubuntu as well.
