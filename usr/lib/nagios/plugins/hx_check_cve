@@ -2,21 +2,30 @@
 checkfixed=0
 fixedentries="NA"
 entries=0
+noobsoleteparam=""
+for arg in "$@"
+do
+    if [ "$arg" == "--fixed" ] || [ "$arg" == "-f" ]
+    then
+        checkfixed="1"
+    fi
 
-if [ "$1" == "-f" ]; then
-  checkfixed=1
-fi
+    if [ "$arg" == "--no-obsolete" ] || [ "$arg" == "-o" ]
+    then
+        noobsoleteparam=" --no-obsolete "
+    fi
+done
 
 
 if [ "${checkfixed}" == "1" ] ; then
   fixedentries=$(
     debsecan \
-    --only-fixed \
-    --suite=$(lsb_release -c|sed -e "s|.*[[:space:]]||g") | grep -v obsolete | |wc -l)
+    --only-fixed ${noobsoleteparam} \
+    --suite=$(lsb_release -c|sed -e "s|.*[[:space:]]||g")  |wc -l)
 fi
 entries=$(
-  debsecan \
-  --suite=$(lsb_release -c|sed -e "s|.*[[:space:]]||g") | grep -v obsolete | wc -l)
+  debsecan ${noobsoleteparam} \
+  --suite=$(lsb_release -c|sed -e "s|.*[[:space:]]||g") | wc -l)
 
 
 if [ "${entries}" != "0" ] ; then

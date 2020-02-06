@@ -14,6 +14,12 @@ Running with
 `/usr/lib/nagios/plugins/hx_check_cve -f`
 and you will also get how many CVEs are already fixed.
 
+# Skipping obsulete CVEs?
+By adding `--no-obsolete` or `-o` to the call, debsecan will run with "--no-obsolete" param and ignoring obsolete CVEs. Please refer to `man debsecan` for that parameter.
+
+Example call:
+`/usr/lib/nagios/plugins/hx_check_cve -f -o`
+
 # Requirements
 hx_check_cve requires lsb-release and debsecan. You can install those by running
 `apt install lsb-release debsecan`
