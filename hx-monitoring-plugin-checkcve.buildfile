@@ -4,7 +4,7 @@ Homepage: https://hexathos.de
 Standards-Version: 3.9.2
 
 Package: hx-monitoring-plugin-checkcve
-Version: 1.0.0-DATE~git+GITVERSION~jenkinsbuild+BUILD
+Version: 1.0.1-DATE~git+GITVERSION~jenkinsbuild+BUILD
 Maintainer: Rainer Bendig <hexathos@mailbox.org>
 Architecture: all
 Files: usr/lib/nagios/plugins/hx_check_cve /
