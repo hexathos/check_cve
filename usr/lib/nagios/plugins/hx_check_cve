@@ -12,11 +12,11 @@ if [ "${checkfixed}" == "1" ] ; then
   fixedentries=$(
     debsecan \
     --only-fixed \
-    --suite=$(lsb_release -c|sed -e "s|.*[[:space:]]||g") |wc -l)
+    --suite=$(lsb_release -c|sed -e "s|.*[[:space:]]||g") | grep -v obsolete | |wc -l)
 fi
 entries=$(
   debsecan \
-  --suite=$(lsb_release -c|sed -e "s|.*[[:space:]]||g") | wc -l)
+  --suite=$(lsb_release -c|sed -e "s|.*[[:space:]]||g") | grep -v obsolete | wc -l)
 
 
 if [ "${entries}" != "0" ] ; then
