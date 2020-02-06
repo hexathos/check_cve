@@ -1,0 +1,29 @@
+#!/bin/bash
+checkfixed=0
+fixedentries="NA"
+entries=0
+
+if [ "$1" == "-f" ]; then
+  checkfixed=1
+fi
+
+
+if [ "${checkfixed}" == "1" ] ; then
+  fixedentries=$(
+    debsecan \
+    --only-fixed \
+    --suite=$(lsb_release -c|sed -e "s|.*[[:space:]]||g") |wc -l)
+fi
+entries=$(
+  debsecan \
+  --suite=$(lsb_release -c|sed -e "s|.*[[:space:]]||g") | wc -l)
+
+
+if [ "${entries}" != "0" ] ; then
+  echo "Affected by ${entries} CVEs"
+  if [ "${fixedentries}" != "NA" ] ; then
+    echo "!!! ${fixedentries} CVEs have been fixed already !!!"
+  fi
+  exit 1
+fi
+exit 0
