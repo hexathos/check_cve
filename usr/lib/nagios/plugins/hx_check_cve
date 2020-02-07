@@ -3,36 +3,95 @@ checkfixed=0
 fixedentries="NA"
 entries=0
 noobsoleteparam=""
+exitcode=1
+warning=1
+critical=30
+suite=$(lsb_release -c|sed -e "s|.*[[:space:]]||g")
+
+distributor=$(lsb_release -i | sed -e "s|.*[[:space:]]||g")
+
+
+function displayHelp () {
+  echo "Usage: $0 [--fixed|-f] [--no-obsolete|-o] [--suite|-s <suite>] [-w <threshold>] [-c <threshold>]"
+  echo " --fixed | -f : Displays how many CVEs are already fixed"
+  echo " --no-obsolete | -o : Skips obsolete CVEs, be careful with that and refer to man debsecan"
+  echo " --suite <value> | -s <value> : Override autodetection of suite"
+  echo " -w <threshold> : Set a number ob minimum affected CVEs to treat as warning, defaults to 1"
+  echo " -c <threshold> : Set a number ob minimum affected CVEs to treat as critical, defaults to 30"
+  echo " --help | -h : This help"
+}
+
 for arg in "$@"
 do
-    if [ "$arg" == "--fixed" ] || [ "$arg" == "-f" ]
+    if [ "${arg}" == "--fixed" ] || [ "${arg}" == "-f" ]
     then
         checkfixed="1"
+        shift
     fi
 
-    if [ "$arg" == "--no-obsolete" ] || [ "$arg" == "-o" ]
+    if [ "${arg}" == "--no-obsolete" ] || [ "${arg}" == "-o" ]
     then
         noobsoleteparam=" --no-obsolete "
+        shift
     fi
+
+    if [ "${arg}" == "--suite" ] || [ "${arg}" == "-s" ]
+    then
+        suite=$2
+            shift
+            shift
+    fi
+    if [ "${arg}" == "-w" ]
+    then
+        warning=$2
+            shift
+            shift
+    fi
+    if [ "${arg}" == "-c" ]
+    then
+        critical=$2
+            shift
+            shift
+    fi
+    if [ "${arg}" == "--help" ] || [ "${arg}" == "-h" ]
+    then
+        displayHelp
+        exit 0
+    fi
+
 done
 
+if [ "${distributor}" != "Debian" ] ; then
+echo "Not running on a debian system."
+exit 3
+fi
 
 if [ "${checkfixed}" == "1" ] ; then
   fixedentries=$(
     debsecan \
     --only-fixed ${noobsoleteparam} \
-    --suite=$(lsb_release -c|sed -e "s|.*[[:space:]]||g")  |wc -l)
+    --suite=${suite}  |wc -l)
 fi
 entries=$(
   debsecan ${noobsoleteparam} \
-  --suite=$(lsb_release -c|sed -e "s|.*[[:space:]]||g") | wc -l)
+  --suite=${suite} | wc -l)
 
 
 if [ "${entries}" != "0" ] ; then
   echo "Affected by ${entries} CVEs"
+
   if [ "${fixedentries}" != "NA" ] ; then
     echo "!!! ${fixedentries} CVEs have been fixed already !!!"
   fi
-  exit 1
+
+  if [ ${entries} -ge ${critical} ] ; then
+    echo crit
+    exit 2
+  fi
+
+  if [ ${entries} -ge ${warning} ] ; then
+    echo warn
+    exit 1
+  fi
 fi
 exit 0

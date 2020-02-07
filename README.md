@@ -1,7 +1,7 @@
 # hx_check_cve
 
 # What is hx_check_cve?
-hx_check_cve makes use of debsecan and checks all installed packages against CVE entries.
+hx_check_cve makes use of debsecan and checks all installed packages against CVE entries. Please note: It only supports Debian it will not work on ubuntu or other distributions that are not tracked on https://security-tracker.debian.org.
 
 # How do I use hx_check_cve
 Simply copy hx_check_cve into /var/lib/nagios/plugins and give it the execution file mode bit (`chmod +x /usr/lib/nagios/plugins/hx_check_cve`). Call it by
@@ -25,4 +25,4 @@ hx_check_cve requires lsb-release and debsecan. You can install those by running
 `apt install lsb-release debsecan`
 
 # Debian Package
-A package for Debian ist available at https://files.hexathos.de/projects/hx-monitoring-plugin-checkcve/ , it should work on ubuntu as well.
+A package for Debian ist available at https://files.hexathos.de/projects/hx-monitoring-plugin-checkcve/
