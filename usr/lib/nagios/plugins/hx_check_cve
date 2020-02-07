@@ -40,8 +40,7 @@ do
     if [ "${arg}" == "--no-low" ] || [ "${arg}" == "-l" ]
     then
       skiplowcmd=" | grep -v 'low urgency' "
-
-        shift
+      shift
     fi
 
     if [ "${arg}" == "--suite" ] || [ "${arg}" == "-s" ]
@@ -76,14 +75,21 @@ if [ "${distributor}" != "Debian" ] ; then
 fi
 
 if [ "${checkfixed}" == "1" ] ; then
-  fixedentries=$(
-    debsecan \
-    --only-fixed ${noobsoleteparam} \
-    --suite=${suite} ${skiplowcmd} | wc -l)
+	runfixedcmd="debsecan --only-fixed ${noobsoleteparam} --suite=${suite}"
+	if [ "${skiplowcmd}" != "" ] ; then
+		runfixedcmd="${runfixedcmd} ${skiplowcmd}"
+	fi
+	runfixedcmd="${runfixedcmd} | wc -l"
+  fixedentries=$(eval ${runfixedcmd})
 fi
-entries=$(
-  debsecan ${noobsoleteparam} \
-  --suite=${suite} ${skiplowcmd} | wc -l)
+
+runcmd="debsecan ${noobsoleteparam} --suite=${suite}"
+if [ "${skiplowcmd}" != "" ] ; then
+  runcmd="${runcmd} ${skiplowcmd}"
+fi
+runcmd="${runcmd} | wc -l"
+
+entries=$(eval ${runcmd})
 
 if [ "${entries}" != "0" ] ; then
   echo "Affected by ${entries} CVEs"
