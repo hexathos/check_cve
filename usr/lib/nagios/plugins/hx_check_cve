@@ -6,14 +6,16 @@ noobsoleteparam=""
 exitcode=1
 warning=1
 critical=30
+skiplowcmd=""
 suite=$(lsb_release -c|sed -e "s|.*[[:space:]]||g")
 
 distributor=$(lsb_release -i | sed -e "s|.*[[:space:]]||g")
 
 
 function displayHelp () {
-  echo "Usage: $0 [--fixed|-f] [--no-obsolete|-o] [--suite|-s <suite>] [-w <threshold>] [-c <threshold>]"
+  echo "Usage: $0 [--fixed|-f] [--no-obsolete|-o] [--no-low|-l] [--suite|-s <suite>] [-w <threshold>] [-c <threshold>]"
   echo " --fixed | -f : Displays how many CVEs are already fixed"
+  echo " --no-low | -l : Skips CVEs marked with low urgency."
   echo " --no-obsolete | -o : Skips obsolete CVEs, be careful with that and refer to man debsecan"
   echo " --suite <value> | -s <value> : Override autodetection of suite"
   echo " -w <threshold> : Set a number ob minimum affected CVEs to treat as warning, defaults to 1"
@@ -32,6 +34,13 @@ do
     if [ "${arg}" == "--no-obsolete" ] || [ "${arg}" == "-o" ]
     then
         noobsoleteparam=" --no-obsolete "
+        shift
+    fi
+
+    if [ "${arg}" == "--no-low" ] || [ "${arg}" == "-l" ]
+    then
+      skiplowcmd=" | grep -v 'low urgency' "
+
         shift
     fi
 
@@ -62,35 +71,32 @@ do
 done
 
 if [ "${distributor}" != "Debian" ] ; then
-echo "Not running on a debian system."
-exit 3
+  echo "Not running on a debian system."
+  exit 3
 fi
 
 if [ "${checkfixed}" == "1" ] ; then
   fixedentries=$(
     debsecan \
     --only-fixed ${noobsoleteparam} \
-    --suite=${suite}  |wc -l)
+    --suite=${suite} ${skiplowcmd} | wc -l)
 fi
 entries=$(
   debsecan ${noobsoleteparam} \
-  --suite=${suite} | wc -l)
-
+  --suite=${suite} ${skiplowcmd} | wc -l)
 
 if [ "${entries}" != "0" ] ; then
   echo "Affected by ${entries} CVEs"
 
-  if [ "${fixedentries}" != "NA" ] ; then
+  if [ "${fixedentries}" != "NA" ] && [ ${fixedentries} -gt 0 ]; then
     echo "!!! ${fixedentries} CVEs have been fixed already !!!"
   fi
 
   if [ ${entries} -ge ${critical} ] ; then
-    echo crit
     exit 2
   fi
 
   if [ ${entries} -ge ${warning} ] ; then
-    echo warn
     exit 1
   fi
 fi
